@@ -46,7 +46,7 @@ void externalSort(const std::string& inputFile, const std::string& outputFile, s
     input.close();
 
     // Phase 2: Merging
-    std::priority_queue<Entry, std::vector<Entry>, std::greater<>> minHeap;
+    std::priority_queue<Entry, std::vector<Entry>, std::greater<Entry>> minHeap;
     std::vector<std::ifstream> runInputs(runFiles.size());
     std::ofstream output(outputFile, std::ios::binary);
 
