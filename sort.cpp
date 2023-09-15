@@ -13,12 +13,12 @@ int main() {
     }
 
     // Pomiar czasu sortowania
-    auto start = std::chrono::high_resolution_clock::now();
+    // auto start = std::chrono::high_resolution_clock::now();
     std::sort(large_array.begin(), large_array.end());
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+    // auto stop = std::chrono::high_resolution_clock::now();
+    // auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 
-    std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
+    std::cout << "Sorting end";
 
     return 0;
 }
