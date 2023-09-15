@@ -15,9 +15,9 @@ struct Entry {
     }
 };
 
-void generateInputFile(const std::string& filename, int elements) {
+void generateInputFile(const std::string& filename, long long elements) {
     std::ofstream file(filename, std::ios::binary);
-    for (int i = 0; i < elements; ++i) {
+    for (long long i = 0; i < elements; ++i) {
         int random_number = std::rand();
         file.write(reinterpret_cast<char*>(&random_number), sizeof(int));
     }
@@ -83,7 +83,7 @@ int main() {
         size_t memorySize = info.freeram / 4;  // Use 1/4 of free RAM for buffer
         std::cout << "Using buffer size: " << memorySize << " bytes." << std::endl;
 
-        generateInputFile("input.bin", 400000000);
+        generateInputFile("input.bin", 8000000000LL);
         externalSort("input.bin", "output.bin", memorySize);
         std::cout << "koniec";
     }
