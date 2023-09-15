@@ -85,6 +85,7 @@ int main() {
 
         generateInputFile("input.bin", 10000);
         externalSort("input.bin", "output.bin", memorySize);
+        std::cout << "koniec";
     }
 
     return 0;
