@@ -83,7 +83,7 @@ int main() {
         size_t memorySize = info.freeram / 4;  // Use 1/4 of free RAM for buffer
        // std::cout << "Using buffer size: " << memorySize << " bytes." << std::endl;
 
-        generateInputFile("input.bin", 500000000LL);
+        generateInputFile("input.bin", 10000000000LL);
         externalSort("input.bin", "output.bin", memorySize);
          if (std::remove("input.bin") != 0) {
              std::cout << "koniec";
