@@ -4,7 +4,7 @@
 #include <chrono>
 
 int main() {
-    size_t array_size = 100000000;  
+    size_t array_size = 300000000;  
     std::vector<double> large_array(array_size);
 
     // Wypełnianie tablicy losowymi wartościami
