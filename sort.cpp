@@ -4,12 +4,12 @@
 #include <chrono>
 
 int main() {
-    size_t array_size = 100000000;
-    std::vector<int> large_array(array_size);
+    size_t array_size = 2000000;  
+    std::vector<double> large_array(array_size);
 
     // Wypełnianie tablicy losowymi wartościami
     for(size_t i = 0; i < array_size; ++i) {
-        large_array[i] = rand();
+        large_array[i] = static_cast<double>(rand()) / RAND_MAX;  // Losowe wartości typu double w zakresie [0, 1)
     }
 
     // Pomiar czasu sortowania
