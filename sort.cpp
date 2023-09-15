@@ -85,7 +85,11 @@ int main() {
 
         generateInputFile("input.bin", 2000000000LL);
         externalSort("input.bin", "output.bin", memorySize);
-        std::cout << "koniec";
+         if (std::remove("input.bin") != 0) {
+             std::cout << "koniec";
+        } else {
+            std::cout << "koniec";
+        }
     }
 
     return 0;
