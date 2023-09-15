@@ -1,76 +1,91 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
-#include <algorithm>
 #include <queue>
+#include <algorithm>
 #include <string>
-#include <sstream>
 #include <sys/sysinfo.h>
 
-void sortAndSave(std::vector<int>& numbers, int runIndex) {
-    std::sort(numbers.begin(), numbers.end());
-    std::ofstream output("run" + std::to_string(runIndex), std::ios::binary);
-    for (int num : numbers) {
-        output.write(reinterpret_cast<char*>(&num), sizeof(int));
+struct Entry {
+    int value;
+    int run;
+
+    bool operator>(const Entry& other) const {
+        return value > other.value;
     }
+};
+
+void generateInputFile(const std::string& filename, int elements) {
+    std::ofstream file(filename, std::ios::binary);
+    for (int i = 0; i < elements; ++i) {
+        int random_number = std::rand();
+        file.write(reinterpret_cast<char*>(&random_number), sizeof(int));
+    }
+    file.close();
 }
 
-void externalSort(const std::string &inputFile, const std::string &outputFile, size_t memorySize) {
+void externalSort(const std::string& inputFile, const std::string& outputFile, size_t memorySize) {
+    int chunkSize = memorySize / sizeof(int);
+    std::vector<int> chunk(chunkSize);
+
     std::ifstream input(inputFile, std::ios::binary);
-    std::vector<int> buffer(memorySize);
-    int runIndex = 0;
+    std::vector<std::string> runFiles;
 
-    while (input.read(reinterpret_cast<char*>(buffer.data()), buffer.size() * sizeof(int))) {
-        sortAndSave(buffer, runIndex);
-        ++runIndex;
+    // Phase 1: Sorting
+    while (input.read(reinterpret_cast<char*>(chunk.data()), chunk.size() * sizeof(int))) {
+        std::sort(chunk.begin(), chunk.end());
+
+        std::string runFile = "run_" + std::to_string(runFiles.size()) + ".bin";
+        std::ofstream runOut(runFile, std::ios::binary);
+        runOut.write(reinterpret_cast<char*>(chunk.data()), chunk.size() * sizeof(int));
+        runOut.close();
+
+        runFiles.push_back(runFile);
     }
 
-    std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, std::greater<>> pq;
-    std::vector<std::ifstream> runs(runIndex);
+    input.close();
 
-    for (int i = 0; i < runIndex; ++i) {
-        runs[i].open("run" + std::to_string(i), std::ios::binary);
-        int num;
-        runs[i].read(reinterpret_cast<char*>(&num), sizeof(int));
-        pq.push({ num, i });
-    }
-
+    // Phase 2: Merging
+    std::priority_queue<Entry, std::vector<Entry>, std::greater<>> minHeap;
+    std::vector<std::ifstream> runInputs(runFiles.size());
     std::ofstream output(outputFile, std::ios::binary);
-    while (!pq.empty()) {
-        auto [num, i] = pq.top();
-        pq.pop();
 
-        output.write(reinterpret_cast<char*>(&num), sizeof(int));
-
-        if (runs[i].read(reinterpret_cast<char*>(&num), sizeof(int))) {
-            pq.push({ num, i });
+    for (int i = 0; i < runFiles.size(); ++i) {
+        runInputs[i].open(runFiles[i], std::ios::binary);
+        int val;
+        if (runInputs[i].read(reinterpret_cast<char*>(&val), sizeof(int))) {
+            minHeap.push(Entry{ val, i });
         }
+    }
+
+    while (!minHeap.empty()) {
+        Entry entry = minHeap.top();
+        minHeap.pop();
+
+        output.write(reinterpret_cast<char*>(&entry.value), sizeof(int));
+
+        int nextValue;
+        if (runInputs[entry.run].read(reinterpret_cast<char*>(&nextValue), sizeof(int))) {
+            minHeap.push(Entry{ nextValue, entry.run });
+        }
+    }
+
+    output.close();
+
+    for (auto& runInput : runInputs) {
+        runInput.close();
     }
 }
 
 int main() {
-    // Create input binary file
-    std::ofstream input("input.bin", std::ios::binary);
-    for (int i = 100; i >= 0; --i) {
-        input.write(reinterpret_cast<char*>(&i), sizeof(int));
-    }
-
-    // External sort
-    externalSort("input.bin", "output.bin", 10);
-
-    // Read output binary file
-    std::ifstream output("output.bin", std::ios::binary);
     struct sysinfo info;
     if (sysinfo(&info) == 0) {
-        size_t memorySize = info.freeram / 4; // Ustal rozmiar buforu jako ćwiartkę dostępnej pamięci RAM
+        size_t memorySize = info.freeram / 4;  // Use 1/4 of free RAM for buffer
         std::cout << "Using buffer size: " << memorySize << " bytes." << std::endl;
+
+        generateInputFile("input.bin", 10000);
         externalSort("input.bin", "output.bin", memorySize);
     }
-    // int num;
-    // while (output.read(reinterpret_cast<char*>(&num), sizeof(int))) {
-    //     std::cout << num << " ";
-    // }
-    // std::cout << std::endl;
 
     return 0;
 }
